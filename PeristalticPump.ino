@@ -14,26 +14,24 @@ CmdMessenger cmdMessenger = CmdMessenger(Serial, field_separator, command_separa
 
 enum
 {
-  kCOMM_ERROR    = 000, // Lets Arduino report serial port comm error back to the PC (only works for some comm errors)
-  kACK           = 001, // Arduino acknowledges cmd was received
-  kARDUINO_READY = 002, // After opening the comm port, send this cmd 02 from PC to check arduino is ready
-  kERR           = 003, // Arduino reports badly formatted cmd, or cmd not recognised
-  kHWERR         = 004, // Arduino reports badly formatted cmd, or cmd not recognised
-  kSEND_CMDS_END, // Mustnt delete this line
+  kCOMM_ERROR     = 000, // Communication error 
+  kACK                       = 001, // Acknowledgement
+  kARDUINO_READY = 002, // Arduino Ready
+  kERR                       = 003, // Error
+  kHWERR                 = 004, // Hardware Error
+  kSEND_CMDS_END, 
 };
 
 messengerCallbackFunction messengerCallbacks[] = 
 {
-  turn_pump_on,    // 005 in this example
-  turn_pump_off,   // 006
-  get_current,     // 007
+  turn_pump_on,    // 006 
+  turn_pump_off,   // 007
+  get_current,       // 008
   NULL
 };
 
 void turn_pump_off()
 {
-  // Message data is any ASCII bytes (0-255 value). But can't contain the field
-  // separator, command separator chars you decide (eg ',' and ';')
   md.setM1Speed(0);
   stopIfFault();
 }
@@ -52,7 +50,6 @@ void turn_pump_on()
 
 void get_current()
 {
-
   int current = md.getM1CurrentMilliamps();
   stopIfFault();
 }
@@ -60,13 +57,11 @@ void get_current()
 
 void arduino_ready()
 {
-  // In response to ping. We just send a throw-away Acknowledgement to say "im alive"
-  cmdMessenger.sendCmd(kACK,"Arduino ready");
+  cmdMessenger.sendCmd(kACK,"Ready");
 }
 
 void unknownCmd()
 {
-  // Default response for unknown commands and corrupt messages
   cmdMessenger.sendCmd(kERR,"Unknown command");
 }
 
@@ -94,26 +89,15 @@ void stopIfFault()
 
 void setup()
 {
-  Serial.begin(115200); // Arduino Uno, Mega, with AT8u2 USB
-
-  // cmdMessenger.discard_LF_CR(); // Useful if your terminal appends CR/LF, and you wish to remove them
-  cmdMessenger.print_LF_CR();   // Make output more readable whilst debugging in Arduino Serial Monitor
-  
-  // Attach default / generic callback methods
+  Serial.begin(115200);
+  cmdMessenger.print_LF_CR();
   cmdMessenger.attach(kARDUINO_READY, arduino_ready);
   cmdMessenger.attach(unknownCmd);
 
-  // Attach my application's user-defined callback methods
+
   attach_callbacks(messengerCallbacks);
 
   md.init();
-
-  FlexiTimer2::set(1000, 1.0/1000, flash);
-  FlexiTimer2::start();
-}
-void flash()
-{
-	cmdMessenger.sendCmd(kACK,"Timer2");
 }
 
 // Timeout handling
@@ -136,7 +120,7 @@ void loop()
 {
   cmdMessenger.feedinSerialData();
 
-  // handle timeout function, if any
+  // handle timeout function
   if (  millis() - previousMillis > timeoutInterval )
   {
     timeout();
