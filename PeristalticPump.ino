@@ -14,11 +14,11 @@ CmdMessenger cmdMessenger = CmdMessenger(Serial, field_separator, command_separa
 
 enum
 {
-  kCOMM_ERROR     = 000, // Communication error 
-  kACK                       = 001, // Acknowledgement
+  kCOMM_ERROR    = 000, // Communication error 
+  kACK           = 001, // Acknowledgement
   kARDUINO_READY = 002, // Arduino Ready
-  kERR                       = 003, // Error
-  kHWERR                 = 004, // Hardware Error
+  kERR           = 003, // Error
+  kHWERR         = 004, // Hardware Error
   kSEND_CMDS_END, 
 };
 
@@ -26,7 +26,7 @@ messengerCallbackFunction messengerCallbacks[] =
 {
   turn_pump_on,    // 006 
   turn_pump_off,   // 007
-  get_current,       // 008
+  get_current,     // 008
   NULL
 };
 
